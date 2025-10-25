@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Genz Kenya</title>
+<style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background : rgba(153, 206, 167, 1);
+    }
+    .story-bar {
+      display: flex;
+      overflow-x: auto;
+      padding: 1em;
+      background: #137044D6;
+    }
+    .story-item {
+      flex: 0 0 auto;
+      width: 80px;
+      height: 120px;
+      margin-right: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid #ccc;
+      text-align: center;
+      font-size: 12px;
+      background : #B1D736A6;
+      cursor: pointer;
+      box-shadow: 0 2px 5px hsla(0, 77%, 48%, 0.84);
+      transition: transform 0.2s ease;
+    }
+    .story-item:hover {
+      transform: scale(1.05);
+    }
+    .story-item img, .story-item video {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+    }
+    .post-box {
+      background: white ;
+      margin: 1em;
+      padding: 1em;
+      border-radius: 8px;
+    }
+    .post-box input, .post-box textarea, .post-box select {
+      width: 100%;
+      margin: 0.5em 0;
+      padding: 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .post {
+      background: rgba(7, 209, 100, 0.19);
+      margin: 1em;
+      padding: 1em;
+      border-radius: 8px;
+      border-left: 5px solid #61dafb;
+    }
+    .post .content {
+      max-height: 6em;
+      overflow: hidden;
+    }
+    .see-more {
+      color: blue;
+      cursor: pointer;
+    }
+    .timestamp, .category {
+      color: #777;
+      font-size: 0.8em;
+    }
+    .reactions, .comments {
+      margin-top: 0.5em;
+    }
+    .reactions button, .comment button {
+      margin-right: 0.5em;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .comment {
+      margin-left: 1em;
+      background: #f9f9f9;
+      padding: 0.5em;
+      border-radius: 5px;
+      margin-top: 5px;
+    }
+    .comment-input {
+      display: flex;
+      margin-top: 0.5em;
+      gap: 5px;
+    }
+    .comment-input input {
+      flex: 1;
+      padding: 5px;
+    }
+    .refresh-btn {
+      position: fixed;
+      bottom: 650px;
+      right: 50px;
+      background: rgba(34, 193, 27, 1);
+      color: white;
+      border: none;
+      padding: 15px;
+      border-radius: 50%;
+      font-size: 10px;
+      cursor: pointer;
+      z-index: 100;
+    }
+   .navl {
+    list-style: none;
+    display: flex;
+    gap: 10px;
+    margin :0px ;
+    text-decoration: none ;
+   }
+  .logo {
+    background :lightblue ;
+    position :fixed ;
+    padding :1em ;
+    width :100%;
+    margin :2px ;
+    padding-right :2px ;
+  }
+  .navl button{
+    background :rgba(154, 185, 76, 0.67) ;
+    padding :0.5em ;
+    border-radius :10px ;
+    border:none ;
+    box-shadow :0 0 10px rgba(180, 14, 200, 1) ;
+  }
+  h1 {
+    color :hsla(116, 80%, 48%, 0.62);
+  }
+ .account {
+   padding :1em ;
+   background :transparent ;
+   position :fixed ;
+   bottom :650px ;
+   right :250px ;
+   color :hsla(0, 87%, 44%, 1);
+   font-weight :bold ;
+   border :none ;
+   border-radius :10px ;
+   box-shadow :0 0 10px red ;
+   text-shadow: 1px 0px 10px green;
+ }
+  </style>
+</head>
+<body>
+<header class="boc">
+<h1>Welcome to Tech-G</h1>
+<nav class="logo">
+<div class="navl" id="category-buttons">
+<button onclick="filterPosts('all')">All</button>
+<button onclick="filterPosts('politics')">Politics</button>
+<button onclick="filterPosts('tech')">Tech</button>
+<button onclick="filterPosts('news')">News</button>
+<button onclick="filterPosts('mocks')">Mocks</button>
+<button onclick="filterPosts('announce')">Announce</button>
+</div> 
+</nav>
+<!------ <button class="account">ACCOUNT</button>
+<button class="refresh-btn" onclick="refreshPage()"><span><b>new<br/>posts</b></span></button> ----->
+</header>
+<div class="story-bar" id="storyContainer">
+<div class="story-item" onclick="uploadStory()">
+<img src="https://via.placeholder.com/80x100?text=+"/>
+<div>Create</div>
+</div>
+</div>
+<div class="post-box">
+<input id="heading" maxlength="50" minlength="5" placeholder="Post Heading (5-50 chars)" required="" type="text"/>
+<textarea id="content" placeholder="Write something..." rows="4"></textarea>
+<select id="category">
+<option value="">Select Category</option>
+<option value="politics">Politics</option>
+<option value="announcements">Announcements</option>
+<option value="news">News</option>
+<option value="mocks">Mocks</option>
+<option value="technology">Technology</option>
+</select>
+<input accept="image/*,video/*" id="media" type="file"/>
+<button onclick="postContent()">Post</button>
+</div>
+<div id="posts"></div>
+<script>
+    const posts = [];
+
+    function postContent() {
+      const heading = document.getElementById('heading').value.trim();
+      const content = document.getElementById('content').value.trim();
+      const category = document.getElementById('category').value;
+      const mediaInput = document.getElementById('media');
+
+      if (heading.length < 5 || heading.length > 50 || !category) {
+        alert('Make sure you have Heading more than 5 characters and your post category.');
+        return;
+      }
+
+      const timestamp = new Date().toLocaleString();
+      let mediaURL = '', mediaType = '';
+
+      if (mediaInput.files.length) {
+        const file = mediaInput.files[0];
+        mediaURL = URL.createObjectURL(file);
+        mediaType = file.type.startsWith('video') ? 'video' : 'image';
+      }
+
+      posts.unshift({
+        heading,
+        content,
+        category,
+        timestamp,
+        sender: 'Unknown',
+        mediaURL,
+        mediaType,
+        likes: 0,
+        loves: 0,
+        comments: []
+      });
+
+      renderPosts(posts);
+    }
+
+    function renderPosts(data) {
+      const container = document.getElementById('posts');
+      container.innerHTML = '';
+
+      data.forEach((post, index) => {
+        const contentLines = post.content.split('\n').length;
+        const showSeeMore = contentLines > 4 || post.content.length > 200;
+
+        const commentsHTML = post.comments.map((c, ci) => `
+          <div class="comment">
+            <div>${c.text}</div>
+            <button onclick="likeComment(${index}, ${ci})">👍 ${c.likes || 0}</button>
+            <button onclick="loveComment(${index}, ${ci})">❤️ ${c.loves || 0}</button>
+            <button onclick="replyComment(${index}, ${ci})">↩️ Reply</button>
+            <div class="comment-replies">
+              ${c.replies.map(r => `<div class='comment'>↪️ ${r}</div>`).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        container.innerHTML += `
+          <div class="post">
+          <p style="color :brown ;font-weight :bold ;"><img style="border-radius :10px ;" src="Images/bg.jpg" alt="" height="30px" width="30px"> anonymous post</p>
+            <h3>${post.heading}</h3>
+            
+            <div class="category"><b style="color :red;">Category</b>: ${post.category}</div>
+            ${post.mediaURL ?
+              post.mediaType === 'video'
+                ? `<video src="${post.mediaURL}" controls style="width:100%; max-height:30px; margin:10px 0;"></video>`
+                : `<img src="${post.mediaURL}" style="width:50%; max-height:300px; object-fit:cover; cursor:pointer;" onclick="window.open('${post.mediaURL}', '_blank')">`
+              : ''
+            }
+            <div class="content">${post.content}</div>
+            ${showSeeMore ? `<span class="see-more" onclick="this.previousElementSibling.style.maxHeight='none'; this.remove();">See more</span>` : ''}
+            <div class="timestamp">Posted on ${post.timestamp}</div>
+            <div class="reactions">
+              <button onclick="likePost(${index})">👍 Like ${post.likes}</button>
+              <button onclick="lovePost(${index})">❤️ Love ${post.loves}</button>
+            </div>
+            <div class="comments">${commentsHTML}</div>
+            <div class="comment-input">
+              <input type="text" placeholder="Write a comment..." onkeypress="if(event.key==='Enter'){addComment(${index}, this)}">
+              <button onclick="addComment(${index}, this.previousElementSibling)">Post</button>
+            </div>
+          </div>`;
+      });
+    }
+
+    function addComment(postIndex, inputElem) {
+      const text = inputElem.value.trim();
+      if (!text) return;
+      posts[postIndex].comments.push({ text, likes: 0, loves: 0, replies: [] });
+      inputElem.value = '';
+      renderPosts(posts);
+    }
+
+    function likePost(index) {
+      posts[index].likes++;
+      renderPosts(posts);
+    }
+
+    function lovePost(index) {
+      posts[index].loves++;
+      renderPosts(posts);
+    }
+
+    function likeComment(postIndex, commentIndex) {
+      posts[postIndex].comments[commentIndex].likes = (posts[postIndex].comments[commentIndex].likes || 0) + 1;
+      renderPosts(posts);
+    }
+
+    function loveComment(postIndex, commentIndex) {
+      posts[postIndex].comments[commentIndex].loves = (posts[postIndex].comments[commentIndex].loves || 0) + 1;
+      renderPosts(posts);
+    }
+
+    function replyComment(postIndex, commentIndex) {
+      const reply = prompt('Your reply:');
+      if (reply) {
+        posts[postIndex].comments[commentIndex].replies.push(reply);
+        renderPosts(posts);
+      }
+    }
+
+    function uploadStory() {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*,video/*';
+      fileInput.onchange = () => {
+        const captionInput = document.createElement('input');
+        captionInput.type = 'text';
+        captionInput.placeholder = 'Enter your story caption...';
+        captionInput.style = 'margin-top:10px;width:80%;padding:8px;border:1px solid #ccc;';
+        const confirmBtn = document.createElement('button');
+        confirmBtn.innerText = 'Upload Story';
+        confirmBtn.style = 'margin-top:5px;padding:8px;background:#61dafb;color:white;border:none;cursor:pointer;';
+        const modal = document.createElement('div');
+        modal.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000a;display:flex;justify-content:center;align-items:center;flex-direction:column;z-index:9999;';
+        modal.appendChild(captionInput);
+        modal.appendChild(confirmBtn);
+        document.body.appendChild(modal);
+
+        confirmBtn.onclick = () => {
+          const file = fileInput.files[0];
+          const url = URL.createObjectURL(file);
+          const type = file.type.startsWith('video') ? 'video' : 'image';
+          const caption = captionInput.value || '';
+          const story = document.createElement('div');
+          story.className = 'story-item';
+          story.onclick = () => viewStory(url, caption, type);
+          story.innerHTML = `
+            <div style="position:relative;width:100%;height:100px;">
+              ${type === 'image'
+                ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover;" />`
+                : `<video src="${url}" muted style="width:100%;height:100%;object-fit:cover;"></video>`}
+              <div style="position:absolute;bottom:0;width:100%;background:rgba(0,0,0,0.5);color:white;font-size:11px;">${caption}</div>
+            </div>
+          `;
+          const container = document.getElementById('storyContainer');
+          container.insertBefore(story, container.children[1]);
+          modal.remove();
+        };
+      };
+      fileInput.click();
+    }
+
+    function viewStory(url, caption, type) {
+      const viewer = document.createElement('div');
+      viewer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:black;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2000;color:white;';
+      viewer.innerHTML = `
+        <div style="position:absolute;top:10px;left:10px;font-size:2em;cursor:pointer;" onclick="this.parentElement.remove()">←</div>
+        ${type === 'video' ? `<video src="${url}" controls autoplay style="max-height:80%;"></video>` : `<img src="${url}" style="max-height:80%;" />`}
+        <div>${caption}</div>
+      `;
+      document.body.appendChild(viewer);
+    }
+
+    function refreshPage() {
+      renderPosts(posts); // just re-renders the latest posts array
+    }
+function filterPosts(category) {
+  const posts = document.querySelectorAll('.post');
+  posts.forEach(post => {
+    const postCategory = post.getAttribute('data-category');
+    if (category === 'all' || postCategory === category) {
+      post.style.display = 'block';
+    } else {
+      post.style.display = 'none';
+    }
+  });
+}
+
+document.querySelectorAll('.post img, .post video').forEach(media => {
+  media.addEventListener('click', () => {
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = 0;
+    modal.style.left = 0;
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.innerHTML = media.outerHTML;
+    modal.onclick = () => modal.remove();
+    document.body.appendChild(modal);
+  });
+});
+</script></body>
+</html>
